@@ -11,6 +11,7 @@ public class CombatGame extends GameApplication {
         settings.setHeight(600);
         settings.setTitle("Combat Game");
         settings.setVersion("1.0");
+        settings.setManualResizeEnabled(true);
     }
 
     public static void main(String[] args) {
