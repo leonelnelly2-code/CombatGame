@@ -22,26 +22,6 @@ public class CombatGame extends GameApplication {
 
         }
 
-        public void startGameThread() {
-            // Start game logic here
-            gameThread = new Thread(this);
-            gameThread.start();
-        }
-
-        @Override
-        public void run() {
-
-
-            while(gamethread != null) {
-
-            System.out.printl("The loop is running");
-            }
-
-
-            
-
-
-        }
 
     public static void main(String[] args) {
         launch(args); // this comes from FXGL
