@@ -1,4 +1,4 @@
-package com.example.combatgame01;
+ package com.example.combatgame01;
 
 import com.almasb.fxgl.entity.component.Component;
 

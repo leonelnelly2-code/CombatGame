@@ -14,7 +14,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class CombatGame extends GameApplication {
@@ -63,9 +62,9 @@ public class CombatGame extends GameApplication {
                     .buildAndAttach();
 
             // UI for stats
-            healthText = new Text("Health: 100");
-            healthText.setTranslateX(10);
-            healthText.setTranslateY(30);
+        healthText = new Text("Health: 100");
+        healthText.setTranslateX(20); // Slightly right of health bar
+        healthText.setTranslateY(25); // Vertically centered with health bar
             healthBar = new Rectangle(200, 20, Color.RED);
             healthBar.setArcWidth(12);
             healthBar.setArcHeight(12);
@@ -124,26 +123,41 @@ public class CombatGame extends GameApplication {
 
     private void showPauseMenu() {
         Button resumeBtn = new Button("Resume");
+        Button mainMenuBtn = new Button("Main Menu");
         Button quitBtn = new Button("Quit");
-        VBox menuBox = new VBox(20, resumeBtn, quitBtn);
+        VBox menuBox = new VBox(20, resumeBtn, mainMenuBtn, quitBtn);
         menuBox.setTranslateX(300);
         menuBox.setTranslateY(200);
         pauseMenu = new StackPane(menuBox);
         FXGL.addUINode(pauseMenu);
         resumeBtn.setOnAction(e -> FXGL.removeUINode(pauseMenu));
+        mainMenuBtn.setOnAction(e -> {
+            FXGL.removeUINode(pauseMenu);
+            resetToMainMenu();
+        });
         quitBtn.setOnAction(e -> Platform.exit());
     }
 
     private void showGameOverMenu() {
         Button restartBtn = new Button("Restart");
+        Button mainMenuBtn = new Button("Main Menu");
         Button quitBtn = new Button("Quit");
-        VBox menuBox = new VBox(20, restartBtn, quitBtn);
+        VBox menuBox = new VBox(20, restartBtn, mainMenuBtn, quitBtn);
         menuBox.setTranslateX(300);
         menuBox.setTranslateY(200);
         gameOverMenu = new StackPane(menuBox);
         FXGL.addUINode(gameOverMenu);
         restartBtn.setOnAction(e -> restartGame());
+        mainMenuBtn.setOnAction(e -> {
+            FXGL.removeUINode(gameOverMenu);
+            resetToMainMenu();
+        });
         quitBtn.setOnAction(e -> Platform.exit());
+    }
+    // Helper to reset game state and show main menu
+    private void resetToMainMenu() {
+        FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
+        showStartMenu();
     }
 
     private void restartGame() {
