@@ -195,6 +195,14 @@ public class CombatGame extends GameApplication {
                 spawnProjectile(dirX, dirY);
             }
         }, KeyCode.SPACE);
+
+        // Pause functionality (ESC key)
+        FXGL.getInput().addAction(new UserAction("Pause Game") {
+            @Override
+            protected void onActionBegin() {
+                showPauseMenu();
+            }
+        }, KeyCode.ESCAPE);
     }
 
     private void spawnProjectile(double dx, double dy) {
