@@ -1,26 +1,18 @@
 package com.example.combatgame01;
 
-import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
-import javafx.scene.input.KeyCode;
 
 public class PlayerComponent extends Component {
+    private GameStats stats;
 
-    private static final double SPEED = 200; // pixels/sec
-
-    @Override
-    public void onUpdate(double tpf) {
-        if (FXGL.getInput().isKeyDown(KeyCode.W)) {
-            getEntity().translateY(-SPEED * tpf);
-        }
-        if (FXGL.getInput().isKeyDown(KeyCode.S)) {
-            getEntity().translateY(SPEED * tpf);
-        }
-        if (FXGL.getInput().isKeyDown(KeyCode.A)) {
-            getEntity().translateX(-SPEED * tpf);
-        }
-        if (FXGL.getInput().isKeyDown(KeyCode.D)) {
-            getEntity().translateX(SPEED * tpf);
-        }
+    public PlayerComponent() {
+        // Default health set to 100, can be parameterized
+        this.stats = new GameStats(100);
     }
+
+    public GameStats getStats() {
+        return stats;
+    }
+
+    // Add methods to update stats on events (damage, kill, etc.)
 }

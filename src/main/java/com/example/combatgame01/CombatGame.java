@@ -11,9 +11,22 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import javafx.scene.text.Text;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 public class CombatGame extends GameApplication {
 
     private Entity player;
+    private Text healthText;
+    private Text scoreText;
+    private Rectangle healthBar;
+    private Text ammoText;
+    private StackPane startMenu;
+    private StackPane pauseMenu;
+    private StackPane gameOverMenu;
     private final double PLAYER_SPEED = 5;
     private final double PROJECTILE_SPEED = 10;
     private final double ENEMY_SPEED = 2;
@@ -35,19 +48,107 @@ public class CombatGame extends GameApplication {
         screenHeight = settings.getHeight();
     }
 
-    @Override
-    protected void initGame() {
-        // Player entity
-        player = FXGL.entityBuilder()
-                .at(screenWidth / 2, screenHeight / 2)
-                .type(EntityType.PLAYER)
-                .view(new Rectangle(40, 40, Color.BLUE))
-                .buildAndAttach();
+    // ...existing code...
 
-        // Spawn some enemies
-        spawnEnemy(100, 100);
-        spawnEnemy(700, 500);
-        spawnEnemy(400, 100);
+        @Override
+        protected void initGame() {
+            // ...existing code...
+
+            // Player entity
+            player = FXGL.entityBuilder()
+                    .at(screenWidth / 2, screenHeight / 2)
+                    .type(EntityType.PLAYER)
+                    .view(new Rectangle(40, 40, Color.BLUE))
+                    .with(new PlayerComponent())
+                    .buildAndAttach();
+
+            // UI for stats
+            healthText = new Text("Health: 100");
+            healthText.setTranslateX(10);
+            healthText.setTranslateY(30);
+            healthBar = new Rectangle(200, 20, Color.RED);
+            healthBar.setArcWidth(12);
+            healthBar.setArcHeight(12);
+            healthBar.setStroke(Color.BLACK);
+            healthBar.setStrokeWidth(2);
+            healthBar.setTranslateX(10);
+            healthBar.setTranslateY(10);
+            scoreText = new Text("Score: 0");
+            scoreText.setTranslateX(10);
+            scoreText.setTranslateY(50);
+            scoreText.setFont(javafx.scene.text.Font.font("Impact", javafx.scene.text.FontWeight.BOLD, 18));
+            scoreText.setFill(Color.YELLOW);
+            ammoText = new Text("Ammo: 30");
+            ammoText.setTranslateX(10);
+            ammoText.setTranslateY(70);
+            ammoText.setFont(javafx.scene.text.Font.font("Orbitron", javafx.scene.text.FontWeight.BOLD, 18));
+            ammoText.setFill(Color.CYAN);
+            FXGL.addUINode(healthBar);
+            FXGL.addUINode(healthText);
+            FXGL.addUINode(scoreText);
+            FXGL.addUINode(ammoText);
+
+            // Spawn some enemies
+            spawnEnemy(100, 100);
+            spawnEnemy(700, 500);
+            spawnEnemy(400, 100);
+
+            // Show start menu
+            showStartMenu();
+        }
+
+        private void showStartMenu() {
+            Button startBtn = new Button("Start Game");
+            Button quitBtn = new Button("Quit");
+
+            // Style start button
+            startBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;");
+            startBtn.setOnMouseEntered(e -> startBtn.setStyle("-fx-background-color: #218838; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;"));
+            startBtn.setOnMouseExited(e -> startBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;"));
+
+            // Style quit button
+            quitBtn.setStyle("-fx-background-color: #444; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;");
+            quitBtn.setOnMouseEntered(e -> quitBtn.setStyle("-fx-background-color: #222; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;"));
+            quitBtn.setOnMouseExited(e -> quitBtn.setStyle("-fx-background-color: #444; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px; -fx-background-radius: 12; -fx-border-radius: 12;"));
+
+            VBox menuBox = new VBox(20, startBtn, quitBtn);
+            menuBox.setTranslateX(300);
+            menuBox.setTranslateY(200);
+            startMenu = new StackPane(menuBox);
+            FXGL.addUINode(startMenu);
+            startBtn.setOnAction(e -> {
+                FXGL.removeUINode(startMenu);
+            });
+            quitBtn.setOnAction(e -> Platform.exit());
+        }
+
+    private void showPauseMenu() {
+        Button resumeBtn = new Button("Resume");
+        Button quitBtn = new Button("Quit");
+        VBox menuBox = new VBox(20, resumeBtn, quitBtn);
+        menuBox.setTranslateX(300);
+        menuBox.setTranslateY(200);
+        pauseMenu = new StackPane(menuBox);
+        FXGL.addUINode(pauseMenu);
+        resumeBtn.setOnAction(e -> FXGL.removeUINode(pauseMenu));
+        quitBtn.setOnAction(e -> Platform.exit());
+    }
+
+    private void showGameOverMenu() {
+        Button restartBtn = new Button("Restart");
+        Button quitBtn = new Button("Quit");
+        VBox menuBox = new VBox(20, restartBtn, quitBtn);
+        menuBox.setTranslateX(300);
+        menuBox.setTranslateY(200);
+        gameOverMenu = new StackPane(menuBox);
+        FXGL.addUINode(gameOverMenu);
+        restartBtn.setOnAction(e -> restartGame());
+        quitBtn.setOnAction(e -> Platform.exit());
+    }
+
+    private void restartGame() {
+        FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
+        initGame();
     }
 
     @Override
@@ -149,13 +250,20 @@ public class CombatGame extends GameApplication {
     @Override
     protected void onUpdate(double tpf) {
         // Game over check
+        PlayerComponent pc = player.getComponent(PlayerComponent.class);
         FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY)
                 .forEach(enemy -> {
                     if (enemy.isColliding(player)) {
-                        FXGL.getDialogService().showMessageBox("Game Over!");
-                        Platform.exit();
+                        showGameOverMenu();
                     }
                 });
+
+        // Update UI stats
+        healthText.setText("Health: " + pc.getStats().getHealth());
+        scoreText.setText("Score: " + pc.getStats().getScore());
+        ammoText.setText("Ammo: " + pc.getStats().getAmmo());
+        double healthPercent = (double) pc.getStats().getHealth() / pc.getStats().getMaxHealth();
+        healthBar.setWidth(200 * healthPercent);
     }
 
     private void clampPlayer() {
