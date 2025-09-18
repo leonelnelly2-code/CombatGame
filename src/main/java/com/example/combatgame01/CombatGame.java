@@ -23,6 +23,8 @@ public class CombatGame extends GameApplication {
     private Text scoreText;
     private Rectangle healthBar;
     private Text ammoText;
+    private Text comboText;
+    private Text streakText;
     private StackPane startMenu;
     private StackPane pauseMenu;
     private StackPane gameOverMenu;
@@ -63,29 +65,41 @@ public class CombatGame extends GameApplication {
 
             // UI for stats
         healthText = new Text("Health: 100");
-        healthText.setTranslateX(20); // Slightly right of health bar
-        healthText.setTranslateY(25); // Vertically centered with health bar
-            healthBar = new Rectangle(200, 20, Color.RED);
-            healthBar.setArcWidth(12);
-            healthBar.setArcHeight(12);
-            healthBar.setStroke(Color.BLACK);
-            healthBar.setStrokeWidth(2);
-            healthBar.setTranslateX(10);
-            healthBar.setTranslateY(10);
-            scoreText = new Text("Score: 0");
-            scoreText.setTranslateX(10);
-            scoreText.setTranslateY(50);
-            scoreText.setFont(javafx.scene.text.Font.font("Impact", javafx.scene.text.FontWeight.BOLD, 18));
-            scoreText.setFill(Color.YELLOW);
-            ammoText = new Text("Ammo: 30");
-            ammoText.setTranslateX(10);
-            ammoText.setTranslateY(70);
-            ammoText.setFont(javafx.scene.text.Font.font("Orbitron", javafx.scene.text.FontWeight.BOLD, 18));
-            ammoText.setFill(Color.CYAN);
-            FXGL.addUINode(healthBar);
-            FXGL.addUINode(healthText);
-            FXGL.addUINode(scoreText);
-            FXGL.addUINode(ammoText);
+        healthText.setTranslateX(20);
+        healthText.setTranslateY(25);
+        healthBar = new Rectangle(200, 20, Color.RED);
+        healthBar.setArcWidth(12);
+        healthBar.setArcHeight(12);
+        healthBar.setStroke(Color.BLACK);
+        healthBar.setStrokeWidth(2);
+        healthBar.setTranslateX(10);
+        healthBar.setTranslateY(10);
+        scoreText = new Text("Score: 0");
+        scoreText.setTranslateX(10);
+        scoreText.setTranslateY(50);
+        scoreText.setFont(javafx.scene.text.Font.font("Impact", javafx.scene.text.FontWeight.BOLD, 18));
+        scoreText.setFill(Color.YELLOW);
+        ammoText = new Text("Ammo: 30");
+        ammoText.setTranslateX(10);
+        ammoText.setTranslateY(70);
+        ammoText.setFont(javafx.scene.text.Font.font("Orbitron", javafx.scene.text.FontWeight.BOLD, 18));
+        ammoText.setFill(Color.CYAN);
+        comboText = new Text("Combo: 0");
+        comboText.setTranslateX(10);
+        comboText.setTranslateY(90);
+        comboText.setFont(javafx.scene.text.Font.font("Impact", javafx.scene.text.FontWeight.BOLD, 18));
+        comboText.setFill(Color.LIME);
+        streakText = new Text("Streak: 0");
+        streakText.setTranslateX(10);
+        streakText.setTranslateY(110);
+        streakText.setFont(javafx.scene.text.Font.font("Impact", javafx.scene.text.FontWeight.BOLD, 18));
+        streakText.setFill(Color.ORANGE);
+        FXGL.addUINode(healthBar);
+        FXGL.addUINode(healthText);
+        FXGL.addUINode(scoreText);
+        FXGL.addUINode(ammoText);
+        FXGL.addUINode(comboText);
+        FXGL.addUINode(streakText);
 
             // Spawn some enemies
             spawnEnemy(100, 100);
@@ -242,6 +256,10 @@ public class CombatGame extends GameApplication {
                                     if (getEntity().isColliding(enemy)) {
                                         enemy.removeFromWorld();
                                         getEntity().removeFromWorld();
+                                        // Increment combo and streak on kill
+                                        PlayerComponent pc = player.getComponent(PlayerComponent.class);
+                                        pc.getStats().incrementCombo();
+                                        pc.getStats().incrementStreak();
                                     }
                                 });
                     }
@@ -277,6 +295,9 @@ public class CombatGame extends GameApplication {
                 .forEach(enemy -> {
                     if (enemy.isColliding(player)) {
                         showGameOverMenu();
+                        // Reset streak on death
+                        pc.getStats().resetStreak();
+                        pc.getStats().resetCombo();
                     }
                 });
 
@@ -284,6 +305,8 @@ public class CombatGame extends GameApplication {
         healthText.setText("Health: " + pc.getStats().getHealth());
         scoreText.setText("Score: " + pc.getStats().getScore());
         ammoText.setText("Ammo: " + pc.getStats().getAmmo());
+        comboText.setText("Combo: " + pc.getStats().getCombo());
+        streakText.setText("Streak: " + pc.getStats().getStreak());
         double healthPercent = (double) pc.getStats().getHealth() / pc.getStats().getMaxHealth();
         healthBar.setWidth(200 * healthPercent);
     }

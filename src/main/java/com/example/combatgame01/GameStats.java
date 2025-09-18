@@ -8,6 +8,8 @@ public class GameStats {
     private int score;
     private int kills;
     private int deaths;
+    private int combo;
+    private int streak;
 
     public GameStats(int health) {
         this.maxHealth = health;
@@ -17,6 +19,8 @@ public class GameStats {
         this.score = 0;
         this.kills = 0;
         this.deaths = 0;
+        this.combo = 0;
+        this.streak = 0;
     }
     public int getMaxHealth() {
         return maxHealth;
@@ -49,7 +53,6 @@ public class GameStats {
     public void useAmmo(int amount) {
         setAmmo(this.ammo - amount);
     }
-
     public int getHealth() {
         return health;
     }
@@ -58,6 +61,7 @@ public class GameStats {
         this.health = health;
     }
 
+    // Removed duplicate combo and streak fields
     public int getScore() {
         return score;
     }
@@ -76,6 +80,30 @@ public class GameStats {
 
     public int getDeaths() {
         return deaths;
+    }
+
+    public int getCombo() {
+        return combo;
+    }
+
+    public void incrementCombo() {
+        combo++;
+    }
+
+    public void resetCombo() {
+        combo = 0;
+    }
+
+    public int getStreak() {
+        return streak;
+    }
+
+    public void incrementStreak() {
+        streak++;
+    }
+
+    public void resetStreak() {
+        streak = 0;
     }
 
     public void addDeath() {
