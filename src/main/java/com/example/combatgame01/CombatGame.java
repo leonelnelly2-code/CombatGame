@@ -17,7 +17,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -207,40 +206,53 @@ public class CombatGame extends GameApplication {
     }
 
     private void spawnEnemy() {
-        double x = random.nextDouble() * (screenWidth - 80) + 40;
-        double y = random.nextDouble() * (screenHeight - 80) + 40;
-            
-        // Ensure enemy doesn't spawn too close to player
-        while (Math.abs(x - player.getX()) < 100 && Math.abs(y - player.getY()) < 100) {
-            x = random.nextDouble() * (screenWidth - 80) + 40;
-            y = random.nextDouble() * (screenHeight - 80) + 40;
-        }
+    double x = random.nextDouble() * (screenWidth - 80) + 40;
+    double y = random.nextDouble() * (screenHeight - 80) + 40;
         
-        Color enemyColor = Color.hsb(random.nextDouble() * 360, 0.8, 0.9);
+    while (Math.abs(x - player.getX()) < 100 && Math.abs(y - player.getY()) < 100) {
+        x = random.nextDouble() * (screenWidth - 80) + 40;
+        y = random.nextDouble() * (screenHeight - 80) + 40;
+    }
+    
+    // Different sprites based on wave number
+    String enemySprite;
+    if (currentWave <= 3) {
+        // Basic enemies for early waves
+        String[] basicSprites = {"A1.png"};
+        enemySprite = basicSprites[random.nextInt(basicSprites.length)];
+    } else if (currentWave <= 6) {
+        // Medium enemies
+        String[] mediumSprites = {"enemy3.png", "enemy4.png"};
+        enemySprite = mediumSprites[random.nextInt(mediumSprites.length)];
+    } else {
+        // Advanced enemies for later waves
+        String[] advancedSprites = {"enemy5.png", "enemy6.png", "enemy_boss.png"};
+        enemySprite = advancedSprites[random.nextInt(advancedSprites.length)];
+    }
+    
+    Entity enemy = FXGL.entityBuilder()
+        .at(x, y)
+        .type(EntityType.ENEMY)
+        .viewWithBBox(enemySprite)
+        .collidable()
+        .buildAndAttach();
         
-        Entity enemy = FXGL.entityBuilder()
-            .at(x, y)
-            .type(EntityType.ENEMY)
-            .viewWithBBox(new Circle(20, enemyColor))
-            .collidable()
-            .buildAndAttach();
-            
-        // Simple enemy movement component
-        enemy.addComponent(new Component() {
-            private double speed = 1.0 + random.nextDouble() * 0.5;
-            
-            @Override
-            public void onUpdate(double tpf) {
-                if (player != null && isGameActive) {
-                    Point2D direction = player.getPosition().subtract(entity.getPosition()).normalize();
-                    if (direction != null) {
-                        entity.translateX(direction.getX() * speed);
-                        entity.translateY(direction.getY() * speed);
-                    }
+    // Movement component with speed based on wave
+    enemy.addComponent(new Component() {
+        private double speed = 1.0 + (random.nextDouble() * 0.5) + (currentWave * 0.1);
+        
+        @Override
+        public void onUpdate(double tpf) {
+            if (player != null && isGameActive) {
+                Point2D direction = player.getPosition().subtract(entity.getPosition()).normalize();
+                if (direction != null) {
+                    entity.translateX(direction.getX() * speed);
+                    entity.translateY(direction.getY() * speed);
                 }
             }
-        });
-    }
+        }
+    });
+}
 
     @Override
     protected void initInput() {
