@@ -1,7 +1,5 @@
 package com.example.combatgame01;
 
-import org.jetbrains.annotations;
-
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 
