@@ -1,6 +1,6 @@
 package com.example.combatgame01;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
@@ -8,7 +8,7 @@ import com.almasb.fxgl.app.GameSettings;
 public class CombatGame extends GameApplication {
 
     @Override
-    protected void initSettings(@NotNull GameSettings settings) {
+    protected void initSettings(GameSettings settings) {
         settings.setWidth(800);
         settings.setHeight(600);
         settings.setTitle("Combat Game");
