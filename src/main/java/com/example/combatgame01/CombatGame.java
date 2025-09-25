@@ -40,9 +40,8 @@ public class CombatGame extends GameApplication {
     private boolean isGameActive = false;
     private boolean isSpawningWave = false;
     
-    // Add firing cooldown variables
     private boolean canShoot = true;
-    private final double SHOOT_COOLDOWN = 0.3; // seconds
+    private final double SHOOT_COOLDOWN = 0.3;
     private double timeSinceLastShot = 0;
     
     private PlayerStats stats = new PlayerStats();
@@ -58,17 +57,15 @@ public class CombatGame extends GameApplication {
         settings.setTitle("Combat Arena");
         settings.setVersion("1.0");
         settings.setMainMenuEnabled(false);
-
+        
         screenWidth = settings.getWidth();
         screenHeight = settings.getHeight();
     }
 
     @Override
     protected void initGame() {
-        // Clear existing entities
         FXGL.getGameWorld().getEntities().forEach(Entity::removeFromWorld);
         
-        // Reset game state
         stats.reset();
         currentWave = 1;
         enemiesRemaining = 0;
@@ -76,13 +73,13 @@ public class CombatGame extends GameApplication {
         isSpawningWave = false;
         canShoot = true;
         timeSinceLastShot = 0;
-        playerDirection = new Point2D(1, 0); // Reset direction
+        playerDirection = new Point2D(1, 0);
         
-        // Create player
+        // Create player with sprite (now in assets/ directly)
         player = FXGL.entityBuilder()
                 .at(screenWidth / 2, screenHeight / 2)
                 .type(EntityType.PLAYER)
-                .viewWithBBox(new Rectangle(40, 40, Color.BLUE))
+                .viewWithBBox("player.png")
                 .collidable()
                 .buildAndAttach();
 
@@ -91,7 +88,6 @@ public class CombatGame extends GameApplication {
     }
 
     private void setupUI() {
-        // Clear previous UI by removing specific nodes
         try {
             if (healthBar != null) FXGL.getGameScene().removeUINode(healthBar);
             if (healthText != null) FXGL.getGameScene().removeUINode(healthText);
@@ -101,10 +97,8 @@ public class CombatGame extends GameApplication {
             if (startMenu != null) FXGL.getGameScene().removeUINode(startMenu);
             if (gameOverMenu != null) FXGL.getGameScene().removeUINode(gameOverMenu);
         } catch (Exception e) {
-            // Ignore errors
         }
 
-        // Health bar with background
         Rectangle healthBg = new Rectangle(204, 24, Color.gray(0.3));
         healthBg.setTranslateX(10);
         healthBg.setTranslateY(10);
@@ -119,14 +113,12 @@ public class CombatGame extends GameApplication {
         healthText.setFill(Color.WHITE);
         healthText.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
 
-        // Ammo text
         ammoText = new Text("Ammo: 30/30");
         ammoText.setTranslateX(10);
         ammoText.setTranslateY(40);
         ammoText.setFill(Color.BLUE);
         ammoText.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
 
-        // Score and wave info
         scoreText = new Text("Score: 0");
         scoreText.setTranslateX(10);
         scoreText.setTranslateY(60);
@@ -139,7 +131,6 @@ public class CombatGame extends GameApplication {
         waveText.setFill(Color.LIGHTGREEN);
         waveText.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
 
-        // Add UI elements
         FXGL.addUINode(healthBg);
         FXGL.addUINode(healthBar);
         FXGL.addUINode(healthText);
@@ -152,7 +143,6 @@ public class CombatGame extends GameApplication {
         Button startBtn = new Button("Start Game");
         Button quitBtn = new Button("Quit");
 
-        // Style buttons
         startBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10 20;");
         quitBtn.setStyle("-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10 20;");
 
@@ -191,7 +181,6 @@ public class CombatGame extends GameApplication {
         isSpawningWave = true;
         currentWave++;
         
-        // Use timer to start next wave with a delay
         FXGL.getGameTimer().runOnceAfter(() -> {
             enemiesRemaining = ENEMIES_PER_WAVE + (currentWave - 1);
             updateWaveText();
@@ -206,63 +195,59 @@ public class CombatGame extends GameApplication {
     }
 
     private void spawnEnemy() {
-    double x = random.nextDouble() * (screenWidth - 80) + 40;
-    double y = random.nextDouble() * (screenHeight - 80) + 40;
+        double x = random.nextDouble() * (screenWidth - 80) + 40;
+        double y = random.nextDouble() * (screenHeight - 80) + 40;
+            
+        while (Math.abs(x - player.getX()) < 100 && Math.abs(y - player.getY()) < 100) {
+            x = random.nextDouble() * (screenWidth - 80) + 40;
+            y = random.nextDouble() * (screenHeight - 80) + 40;
+        }
         
-    while (Math.abs(x - player.getX()) < 100 && Math.abs(y - player.getY()) < 100) {
-        x = random.nextDouble() * (screenWidth - 80) + 40;
-        y = random.nextDouble() * (screenHeight - 80) + 40;
-    }
-    
-    // Different sprites based on wave number
-    String enemySprite;
-    if (currentWave <= 3) {
-        // Basic enemies for early waves
-        String[] basicSprites = {"A1.png"};
-        enemySprite = basicSprites[random.nextInt(basicSprites.length)];
-    } else if (currentWave <= 6) {
-        // Medium enemies
-        String[] mediumSprites = {"enemy3.png", "enemy4.png"};
-        enemySprite = mediumSprites[random.nextInt(mediumSprites.length)];
-    } else {
-        // Advanced enemies for later waves
-        String[] advancedSprites = {"enemy5.png", "enemy6.png", "enemy_boss.png"};
-        enemySprite = advancedSprites[random.nextInt(advancedSprites.length)];
-    }
-    
-    Entity enemy = FXGL.entityBuilder()
-        .at(x, y)
-        .type(EntityType.ENEMY)
-        .viewWithBBox(enemySprite)
-        .collidable()
-        .buildAndAttach();
+        String enemySprite = getEnemySpriteForWave();
         
-    // Movement component with speed based on wave
-    enemy.addComponent(new Component() {
-        private double speed = 1.0 + (random.nextDouble() * 0.5) + (currentWave * 0.1);
-        
-        @Override
-        public void onUpdate(double tpf) {
-            if (player != null && isGameActive) {
-                Point2D direction = player.getPosition().subtract(entity.getPosition()).normalize();
-                if (direction != null) {
-                    entity.translateX(direction.getX() * speed);
-                    entity.translateY(direction.getY() * speed);
+        Entity enemy = FXGL.entityBuilder()
+            .at(x, y)
+            .type(EntityType.ENEMY)
+            .viewWithBBox(enemySprite)
+            .collidable()
+            .buildAndAttach();
+            
+        enemy.addComponent(new Component() {
+            private double speed = 1.0 + (random.nextDouble() * 0.5) + (currentWave * 0.1);
+            
+            @Override
+            public void onUpdate(double tpf) {
+                if (player != null && isGameActive) {
+                    Point2D direction = player.getPosition().subtract(entity.getPosition()).normalize();
+                    if (direction != null) {
+                        entity.translateX(direction.getX() * speed);
+                        entity.translateY(direction.getY() * speed);
+                    }
                 }
             }
+        });
+    }
+
+    private String getEnemySpriteForWave() {
+        if (currentWave <= 3) {
+            String[] basicSprites = {"A1.png", "A2.png", "A3.png"};
+            return basicSprites[random.nextInt(basicSprites.length)];
+        } else if (currentWave <= 6) {
+            String[] mediumSprites = {"B1.png", "B2.png", "B3.png"};
+            return mediumSprites[random.nextInt(mediumSprites.length)];
+        } else {
+            String[] advancedSprites = {"C1.png", "gun.png"};
+            return advancedSprites[random.nextInt(advancedSprites.length)];
         }
-    });
-}
+    }
 
     @Override
     protected void initInput() {
-        // Movement
         FXGL.onKey(KeyCode.W, () -> movePlayer(0, -1));
         FXGL.onKey(KeyCode.S, () -> movePlayer(0, 1));
         FXGL.onKey(KeyCode.A, () -> movePlayer(-1, 0));
         FXGL.onKey(KeyCode.D, () -> movePlayer(1, 0));
         
-        // Shooting - use onKeyDown for single press detection
         FXGL.onKeyDown(KeyCode.SPACE, () -> {
             if (isGameActive && stats.getAmmo() > 0 && canShoot) {
                 spawnProjectile();
@@ -272,7 +257,6 @@ public class CombatGame extends GameApplication {
             }
         });
         
-        // Restart game
         FXGL.onKeyDown(KeyCode.R, () -> {
             if (!isGameActive) {
                 initGame();
@@ -298,34 +282,30 @@ public class CombatGame extends GameApplication {
     private void spawnProjectile() {
         if (player == null) return;
         
-        // Capture the direction at the moment of shooting
         Point2D shootDirection = playerDirection.normalize();
         
         Entity projectile = FXGL.entityBuilder()
             .at(player.getX() + 20, player.getY() + 18)
             .type(EntityType.PROJECTILE)
-            .viewWithBBox(new Rectangle(10, 5, Color.RED))
+            .viewWithBBox("bullet.png")
             .collidable()
             .buildAndAttach();
             
         projectile.addComponent(new Component() {
             private double speed = 15;
-            private Point2D direction = shootDirection; // Use captured direction
+            private Point2D direction = shootDirection;
             
             @Override
             public void onUpdate(double tpf) {
-                // Move projectile with its own direction
                 entity.translateX(direction.getX() * speed);
                 entity.translateY(direction.getY() * speed);
                 
-                // Remove if off-screen
                 if (entity.getX() < -50 || entity.getX() > screenWidth + 50 ||
                     entity.getY() < -50 || entity.getY() > screenHeight + 50) {
                     entity.removeFromWorld();
                     return;
                 }
                 
-                // Check collisions with enemies - use a list to avoid concurrent modification
                 List<Entity> enemiesToRemove = new ArrayList<>();
                 List<Entity> projectilesToRemove = new ArrayList<>();
                 
@@ -336,14 +316,12 @@ public class CombatGame extends GameApplication {
                     }
                 });
                 
-                // Remove entities after iteration
                 for (Entity enemy : enemiesToRemove) {
                     enemy.removeFromWorld();
                     stats.addScore(10);
                     enemiesRemaining--;
                     updateWaveText();
                     
-                    // Chance to drop ammo
                     if (random.nextDouble() < 0.2) {
                         stats.addAmmo(5);
                     }
@@ -360,7 +338,6 @@ public class CombatGame extends GameApplication {
     protected void onUpdate(double tpf) {
         if (!isGameActive || player == null) return;
         
-        // Update shooting cooldown
         if (!canShoot) {
             timeSinceLastShot += tpf;
             if (timeSinceLastShot >= SHOOT_COOLDOWN) {
@@ -371,14 +348,12 @@ public class CombatGame extends GameApplication {
         checkCollisions();
         updateUI();
         
-        // Update enemy count from actual entities in the world
         int actualEnemyCount = FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).size();
         if (actualEnemyCount != enemiesRemaining) {
             enemiesRemaining = actualEnemyCount;
             updateWaveText();
         }
         
-        // Start next wave if all enemies defeated and we're not already spawning
         if (enemiesRemaining <= 0 && !isSpawningWave && isGameActive) {
             startNextWave();
         }
@@ -387,7 +362,6 @@ public class CombatGame extends GameApplication {
     private void checkCollisions() {
         if (player == null) return;
         
-        // Player-enemy collisions - use a list to avoid concurrent modification
         List<Entity> enemiesToRemove = new ArrayList<>();
         
         FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).forEach(enemy -> {
@@ -403,7 +377,6 @@ public class CombatGame extends GameApplication {
             }
         });
         
-        // Remove enemies after iteration
         for (Entity enemy : enemiesToRemove) {
             enemy.removeFromWorld();
         }
@@ -417,7 +390,6 @@ public class CombatGame extends GameApplication {
         double healthPercent = (double) stats.getHealth() / 100;
         healthBar.setWidth(200 * Math.max(0, healthPercent));
         
-        // Change health bar color based on health
         if (healthPercent > 0.6) {
             healthBar.setFill(Color.LIMEGREEN);
         } else if (healthPercent > 0.3) {
@@ -473,36 +445,4 @@ public class CombatGame extends GameApplication {
     public static void main(String[] args) {
         launch(args);
     }
-}
-
-class PlayerStats {
-    private int health = 100;
-    private int ammo = 30;
-    private int score = 0;
-    
-    public void reset() {
-        health = 100;
-        ammo = 30;
-        score = 0;
-    }
-    
-    public void takeDamage(int damage) { 
-        health = Math.max(0, health - damage); 
-    }
-    
-    public void useAmmo(int amount) { 
-        ammo = Math.max(0, ammo - amount); 
-    }
-    
-    public void addAmmo(int amount) {
-        ammo = Math.min(30, ammo + amount);
-    }
-    
-    public void addScore(int points) { 
-        score += points; 
-    }
-    
-    public int getHealth() { return health; }
-    public int getAmmo() { return ammo; }
-    public int getScore() { return score; }
 }
