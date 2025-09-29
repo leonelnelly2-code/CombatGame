@@ -1,9 +1,4 @@
-module com.example.combatgame01 {
-    requires javafx.controls;
-    requires javafx.fxml;
-
+open module com.example.combatgame01 {
     requires com.almasb.fxgl.all;
-
-    opens com.example.combatgame01 to javafx.fxml;
     exports com.example.combatgame01;
 }
