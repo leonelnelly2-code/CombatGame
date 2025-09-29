@@ -18,6 +18,7 @@ public class GameStats {
         this.kills = 0;
         this.deaths = 0;
     }
+    
     public int getMaxHealth() {
         return maxHealth;
     }
@@ -25,6 +26,7 @@ public class GameStats {
     public void setMaxHealth(int maxHealth) {
         this.maxHealth = maxHealth;
     }
+    
     public int getAmmo() {
         return ammo;
     }

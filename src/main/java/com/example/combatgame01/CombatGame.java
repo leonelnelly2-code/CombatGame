@@ -146,11 +146,11 @@ public class CombatGame extends GameApplication {
                 texture.setScaleX(2.0);
                 texture.setScaleY(2.0);
                 // Apply current flip based on direction
-                if (isFacingRight) {
-                    texture.setScaleX(-2.0); // Flip horizontally for left movement
-                }else {
-                    texture.setScaleX(2.0); // Normal for right movement
-                }   
+                if (!isFacingRight) {
+                    texture.setScaleX(2.0); // Flip horizontally for left movement
+                }else{
+                    texture.setScaleX(-2.0); // Normal scale for right movement
+                }
                 
                 player.getViewComponent().clearChildren();
                 player.getViewComponent().addChild(texture);

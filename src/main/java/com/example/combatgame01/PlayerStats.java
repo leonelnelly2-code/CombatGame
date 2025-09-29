@@ -11,9 +11,8 @@ public class PlayerStats {
         this.health = maxHealth;
     }
 
-    // Add a no-argument constructor for FXGL
     public PlayerStats() {
-        this(100); // Default to 100 health
+        this(100);
     }
     
     public void reset() {
@@ -38,30 +37,19 @@ public class PlayerStats {
         score += points; 
     }
 
-    public int getHealth() {
-        return health;
-    }
-
-    public int getMaxHealth() {
-        return maxHealth;
-    }
-
+    public int getHealth() { return health; }
+    public int getMaxHealth() { return maxHealth; }
+    
     public void damage(int amount) {
         health -= amount;
-        if (health < 0) {
-            health = 0;
-        }
+        if (health < 0) health = 0;
     }
 
-    public boolean isDead() {
-        return health <= 0;
-    }
+    public boolean isDead() { return health <= 0; }
 
     public void heal(int amount) {
         health += amount;
-        if (health > maxHealth) {
-            health = maxHealth;
-        }
+        if (health > maxHealth) health = maxHealth;
     }
     
     public int getAmmo() { return ammo; }
